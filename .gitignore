@@ -1,0 +1,9 @@
+# Folders
+_output
+_obj
+_test
+tmp
+
+# Files
+/*.sh
+/TODO

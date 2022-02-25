@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pts-1cpu
+  labels:
+    app: pts
+spec:
+  containers:
+  - image: quay.io/openshift-psap/pts:micro
+    command:
+      ### Use a wrapper to run the Phoronix Test Suite.
+      - /usr/local/bin/pts.sh
+      ### Replace by the test you want to run.  If no parameters, sleep.
+      #- local/single-threaded-mini
+      - local/micro
+    name: pts
+    imagePullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 1
+        memory: 4Gi
+    #securityContext:
+    # privileged: true
+    env:
+    - name: WATCH_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+  ### Service account is only needed to expose the test results via a ConfigMap.
+  #serviceAccountName: pts
+  ### You may want to run the test suite on a selected (set of) node(s).
+  #nodeSelector:
+  #  cpu: "1"
+  restartPolicy: Never

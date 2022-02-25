@@ -1,0 +1,35 @@
+# Account for the pts Pod.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pts
+  namespace: phoronix-test-suite
+
+---
+
+# Cluster role for the pts Pod.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: phoronix-test-suite:pts
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["create","get","delete","list","update"]
+
+---
+
+# Bind the pts cluster role to its Service Account.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: phoronix-test-suite:pts
+roleRef:
+  kind: ClusterRole
+  name: phoronix-test-suite:pts
+subjects:
+- kind: ServiceAccount
+  name: pts
+  namespace: phoronix-test-suite
+userNames:
+- system:serviceaccount:phoronix-test-suite:pts
