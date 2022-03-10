@@ -4,7 +4,7 @@ COPY . .
 RUN make build
 
 FROM quay.io/centos/centos:stream8
-COPY --from=builder /root/_output/pts-write-cm /usr/local/bin/
+COPY --from=builder /root/_output/ptrp /usr/local/bin/
 WORKDIR /root
 
 # Automatically quit if the time of a test run exceeds 3x the average time it normally takes the particular test to complete its run.

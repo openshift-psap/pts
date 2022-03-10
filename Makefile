@@ -1,7 +1,8 @@
-PROGRAM:=pts-write-cm
+PROGRAM:=ptrp
 SRC:=$(shell find ./cmd -name \*.go)
 ARCH:=amd64	# arm64
 OUT_DIR:=_output
+GOFLAGS:=
 
 DOCKERFILE:=Dockerfile.cs8
 REGISTRY:=quay.io
@@ -16,10 +17,10 @@ PTS_TEST_SUITE:=local/micro
 build: $(PROGRAM)
 
 $(PROGRAM): $(SRC)
-	go build -o $(OUT_DIR)/$(PROGRAM) $^
+	GOFLAGS=$(GOFLAGS) go build -o $(OUT_DIR)/$(PROGRAM) $^
 
 static: $(SRC)
-	CGO_ENABLED=0 go build -o $(OUT_DIR)/$(PROGRAM) -a -installsuffix cgo -ldflags '-s' $^
+	GOFLAGS=$(GOFLAGS) CGO_ENABLED=0 go build -o $(OUT_DIR)/$(PROGRAM) -a -installsuffix cgo -ldflags '-s' $^
 
 fmt format: $(SRC)
 	go fmt $^
