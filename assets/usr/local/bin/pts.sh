@@ -16,8 +16,6 @@ run_in_tmux() {
 }
 
 publish_results() {
-  # Write a config map with the results.
-  pts-write-cm
   # As a fallback option, publish the results via Pod logs.
   cat /var/lib/phoronix-test-suite/test-results/*/composite.xml
 }
