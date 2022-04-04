@@ -3,7 +3,7 @@ WORKDIR /root
 COPY . .
 RUN make build
 
-FROM quay.io/centos/centos:stream8
+FROM quay.io/centos/centos:stream9
 COPY --from=builder /root/_output/ptrp /usr/local/bin/
 WORKDIR /root
 
@@ -19,17 +19,19 @@ COPY ./assets/ /
 # Use "make PTS_TEST_SUITE=mysuite image" instead.
 ARG PTS_TEST_SUITE="local/recommended"
 ARG INSTALL_PKGS=" \
-      expect strace tmux rpm-build procps-ng \
-      php-cli php-xml php-json unzip google-benchmark google-benchmark-devel \
+      expect strace tmux rpm-build procps-ng dnf-utils \
+      php-cli php-xml php-json unzip \
       perl perl-CPAN cmake-filesystem pkg-config ncurses-devel libtool \
-      libassuan-devel xz time \
+      libassuan-devel xz time npth-devel \
     "
-RUN dnf install -y --setopt=tsflags=nodocs epel-release && \
-    dnf config-manager --set-enabled powertools	&& \
+# For tzdata reinstall, see rhbz#2047185 and rhbz#2070567
+RUN dnf install -y --setopt=tsflags=nodocs epel-release dnf-plugins-core && \
+    dnf config-manager --set-enabled crb && \
     dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
-    curl -LO https://kojipkgs.fedoraproject.org/vol/fedora_koji_archive02/packages/npth/1.5/4.fc28/src/npth-1.5-4.fc28.src.rpm && \
-    rpmbuild --rebuild *.rpm && \
-    rpm -ivh /root/rpmbuild/RPMS/$(arch)/npth-devel-1.*.rpm && \
+    dnf reinstall -y --setopt=tsflags=nodocs tzdata && \
+    curl -LO https://kojipkgs.fedoraproject.org/packages/google-benchmark/1.5.4/1.fc34/src/google-benchmark-1.5.4-1.fc34.src.rpm && \
+    yum-builddep -y *.rpm && rpmbuild --rebuild *.rpm && \
+    dnf install -y --setopt=tsflags=nodocs /root/rpmbuild/RPMS/$(arch)/google-benchmark-*.rpm && \
     curl -LO https://phoronix-test-suite.com/releases/phoronix-test-suite-10.8.2.tar.gz && \
     tar xvf *.gz && \
     cd phoronix-test-suite/ && \
