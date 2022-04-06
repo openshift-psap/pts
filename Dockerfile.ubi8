@@ -3,7 +3,7 @@ WORKDIR /root
 COPY . .
 RUN make build
 
-FROM quay.io/centos/centos:stream9
+FROM registry.access.redhat.com/ubi8/ubi:8.5
 COPY --from=builder /root/_output/ptrp /usr/local/bin/
 WORKDIR /root
 
@@ -19,28 +19,32 @@ COPY ./assets/ /
 # Use "make PTS_TEST_SUITE=mysuite image" instead.
 ARG PTS_TEST_SUITE="local/recommended"
 ARG INSTALL_PKGS=" \
-      expect strace tmux rpm-build procps-ng dnf-utils \
-      php-cli php-xml php-json unzip \
+      expect strace tmux rpm-build procps-ng \
+      php-cli php-xml php-json unzip google-benchmark google-benchmark-devel \
       perl perl-CPAN cmake-filesystem pkg-config ncurses-devel libtool \
-      libassuan-devel xz time npth-devel \
+      libassuan-devel xz time \
     "
-# For tzdata reinstall, see rhbz#2047185 and rhbz#2070567
-RUN dnf install -y --setopt=tsflags=nodocs epel-release dnf-plugins-core && \
-    dnf config-manager --set-enabled crb && \
+# Initialize /etc/yum.repos.d/redhat.repo
+# See https://access.redhat.com/solutions/1443553
+RUN subscription-manager repos --enable rhel-8-for-x86_64-appstream-rpms && \
+    subscription-manager repos --enable codeready-builder-for-rhel-8-$(arch)-rpms && \
+    dnf install -y --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
+    dnf repolist --disablerepo=* && \
     dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
-    dnf reinstall -y --setopt=tsflags=nodocs tzdata && \
-    curl -LO https://kojipkgs.fedoraproject.org/packages/google-benchmark/1.5.4/1.fc34/src/google-benchmark-1.5.4-1.fc34.src.rpm && \
-    yum-builddep -y *.rpm && rpmbuild --rebuild *.rpm && \
-    dnf install -y --setopt=tsflags=nodocs /root/rpmbuild/RPMS/$(arch)/google-benchmark-*.rpm && \
+    curl -LO https://kojipkgs.fedoraproject.org/vol/fedora_koji_archive02/packages/npth/1.5/4.fc28/src/npth-1.5-4.fc28.src.rpm && \
+    rpmbuild --rebuild *.rpm && \
+    rpm -ivh /root/rpmbuild/RPMS/$(arch)/npth-devel-1.*.rpm && \
     curl -LO https://phoronix-test-suite.com/releases/phoronix-test-suite-10.8.2.tar.gz && \
     tar xvf *.gz && \
     cd phoronix-test-suite/ && \
     mv pts-core/objects/pts_openbenchmarking_upload.php{,.disabled} && \
+    sed -i 's|<PackageName>python python3|<PackageName>python3|' ./pts-core/external-test-dependencies/xml/fedora-packages.xml && \
     sed -i 's|Digest/</FileCheck>|Digest/ OR /usr/lib64/perl5/vendor_perl/Digest/MD5.pm</FileCheck>|' ./pts-core/external-test-dependencies/xml/generic-packages.xml && \
     for ts in $PTS_TEST_SUITE; do \
       ./phoronix-test-suite install-dependencies $ts && \
       ./phoronix-test-suite install $ts; \
     done && \
     dnf clean all && \
+    rm -rf /etc/pki/entitlement /etc/rhsm && \
     rm -rf /root/{rpmbuild,*.rpm,*.tar.gz} /var/cache/yum
 

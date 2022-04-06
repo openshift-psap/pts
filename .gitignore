@@ -3,6 +3,8 @@ _output
 _obj
 _test
 tmp
+assets/etc/pki
+assets/etc/rhsm
 
 # Files
 /*.sh
