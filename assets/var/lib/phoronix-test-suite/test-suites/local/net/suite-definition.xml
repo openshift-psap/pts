@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<PhoronixTestSuite>
+  <SuiteInformation>
+    <Title>Networking Test Suite</Title>
+    <Version>1.1.0</Version>
+    <TestType>Network</TestType>
+    <Description>The network test suite consists of tests designed to test the computer's networking performance.</Description>
+  </SuiteInformation>
+  <Execute>
+    <Test>pts/iperf</Test>
+    <Arguments>-c localhost -p 5201 -t 10 -P 1</Arguments>
+    <Description>Server Address: localhost - Server Port: 5201 - Duration: 10 Seconds - Test: TCP - Parallel: 1</Description>
+    <OverrideTestOptions></OverrideTestOptions>
+  </Execute>
+</PhoronixTestSuite>
