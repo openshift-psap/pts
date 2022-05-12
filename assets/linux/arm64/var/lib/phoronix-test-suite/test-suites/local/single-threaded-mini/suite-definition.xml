@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<PhoronixTestSuite>
+  <SuiteInformation>
+    <Title>single-threaded-mini</Title>
+    <Version>0.0.1</Version>
+    <TestType>System</TestType>
+    <Description>A minimal collection of the most of the well known single-threaded (or very poorly threaded) benchmarks available via the Phoronix Test Suite.</Description>
+  </SuiteInformation>
+  <Execute>
+    <Test>pts/polyhedron-1.0.1</Test>
+    <Arguments>capacita</Arguments>
+    <Description>Benchmark: capacita</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/polyhedron-1.0.1</Test>
+    <Arguments>doduc</Arguments>
+    <Description>Benchmark: doduc</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/java-scimark2-1.1.2</Test>
+    <Arguments>TEST_DENSE</Arguments>
+    <Description>Computational Test: Dense LU Matrix Factorization</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/perl-benchmark-1.0.1</Test>
+    <Arguments>benchmarks/startup/noprog.b</Arguments>
+    <Description>Test: Interpreter</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/glibc-bench-1.6.1</Test>
+    <Arguments>bench-ffsll</Arguments>
+    <Description>Benchmark: ffsll</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/glibc-bench-1.6.1</Test>
+    <Arguments>bench-asinh</Arguments>
+    <Description>Benchmark: asinh</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/glibc-bench-1.6.1</Test>
+    <Arguments>bench-sinh</Arguments>
+    <Description>Benchmark: sinh</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/glibc-bench-1.6.1</Test>
+    <Arguments>bench-exp</Arguments>
+    <Description>Benchmark: exp</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/cpp-perf-bench-1.0.0</Test>
+    <Arguments>mathlib</Arguments>
+    <Description>Test: Math Library</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/mutex-1.0.0</Test>
+    <Arguments>--benchmark_filter=benchmark_mutex_lock_unlock.std::mutex.</Arguments>
+    <Description>Benchmark: Mutex Lock Unlock std::mutex</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/mutex-1.0.0</Test>
+    <Arguments>--benchmark_filter=benchmark_mutex_lock_unlock.pthread_mutex.</Arguments>
+    <Description>Benchmark: Mutex Lock Unlock pthread_mutex</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/mutex-1.0.0</Test>
+    <Arguments>--benchmark_filter=benchmark_mutex_lock_unlock.ticket_spinlock.</Arguments>
+    <Description>Benchmark: Mutex Lock Unlock ticket_spinlock</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/mutex-1.0.0</Test>
+    <Arguments>--benchmark_filter=benchmark_mutex_lock_unlock.spinlock.</Arguments>
+    <Description>Benchmark: Mutex Lock Unlock spinlock</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/mutex-1.0.0</Test>
+    <Arguments>--benchmark_filter=benchmark_mutex_lock_unlock.spinlock_amd.</Arguments>
+    <Description>Benchmark: Mutex Lock Unlock spinlock_amd</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/mutex-1.0.0</Test>
+    <Arguments>--benchmark_filter=benchmark_shared_mutex_lock_shared</Arguments>
+    <Description>Benchmark: Shared Mutex Lock Shared</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/redis-1.3.1</Test>
+    <Arguments>-t set</Arguments>
+    <Description>Test: SET</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/redis-1.3.1</Test>
+    <Arguments>-t get</Arguments>
+    <Description>Test: GET</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/redis-1.3.1</Test>
+    <Arguments>-t lpush</Arguments>
+    <Description>Test: LPUSH</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/redis-1.3.1</Test>
+    <Arguments>-t lpop</Arguments>
+    <Description>Test: LPOP</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/redis-1.3.1</Test>
+    <Arguments>-t sadd</Arguments>
+    <Description>Test: SADD</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/optcarrot-1.0.1</Test>
+  </Execute>
+  <Execute>
+    <Test>pts/nginx-2.0.0</Test>
+    <Arguments>-c 1</Arguments>
+    <Description>Concurrent Requests: 1</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/nginx-2.0.0</Test>
+    <Arguments>-c 20</Arguments>
+    <Description>Concurrent Requests: 20</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/nginx-2.0.0</Test>
+    <Arguments>-c 100</Arguments>
+    <Description>Concurrent Requests: 100</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/nginx-2.0.0</Test>
+    <Arguments>-c 200</Arguments>
+    <Description>Concurrent Requests: 200</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/nginx-2.0.0</Test>
+    <Arguments>-c 500</Arguments>
+    <Description>Concurrent Requests: 500</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/nginx-2.0.0</Test>
+    <Arguments>-c 1000</Arguments>
+    <Description>Concurrent Requests: 1000</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/phpbench-1.1.6</Test>
+  </Execute>
+</PhoronixTestSuite>

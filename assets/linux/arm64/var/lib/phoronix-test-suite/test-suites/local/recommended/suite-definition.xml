@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<PhoronixTestSuite>
+  <SuiteInformation>
+    <Title>recommended</Title>
+    <Version>0.0.1</Version>
+    <TestType>System</TestType>
+    <Description>A collection benchmarks available via the Phoronix Test Suite, retrieved by list-recommended-tests.</Description>
+  </SuiteInformation>
+  <Execute>
+    <Test>pts/build-linux-kernel</Test>
+    <Arguments>defconfig</Arguments>
+    <Description>Build: defconfig</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/compress-7zip</Test>
+  </Execute>
+  <Execute>
+    <Test>pts/openssl</Test>
+  </Execute>
+  <Execute>
+    <Test>pts/encode-flac</Test>
+  </Execute>
+  <Execute>
+    <Test>pts/compress-pbzip2</Test>
+  </Execute>
+  <Execute>
+    <Test>pts/hmmer</Test>
+  </Execute>
+  <Execute>
+    <Test>pts/gcrypt</Test>
+  </Execute>
+  <Execute>
+    <Test>pts/gmpbench</Test>
+  </Execute>
+  <Execute>
+    <Test>pts/apache</Test>
+  </Execute>
+  <Execute>
+    <Test>pts/pgbench-1.11.1</Test>
+    <Arguments>-s 1 -c 1</Arguments>
+    <Description>Scaling Factor: 1 - Clients: 1 - Mode: Read Write</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/pgbench-1.11.1</Test>
+    <Arguments>-s 1 -c 1 -S</Arguments>
+    <Description>Scaling Factor: 1 - Clients: 1 - Mode: Read Only</Description>
+  </Execute>
+  <Execute>
+    <Test>pts/nginx</Test>
+  </Execute>
+  <Execute>
+    <Test>pts/tjbench</Test>
+  </Execute>
+  <Execute>
+    <Test>system/gimp</Test>
+  </Execute>
+</PhoronixTestSuite>

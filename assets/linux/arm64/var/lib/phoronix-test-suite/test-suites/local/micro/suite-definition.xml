@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<PhoronixTestSuite>
+  <SuiteInformation>
+    <Title>micro</Title>
+    <Version>0.0.1</Version>
+    <TestType>System</TestType>
+    <Description>A minimal benchmark to test the functionality of the Phoronix Test Suite.</Description>
+  </SuiteInformation>
+  <Execute>
+    <Test>pts/tscp</Test>
+  </Execute>
+</PhoronixTestSuite>
