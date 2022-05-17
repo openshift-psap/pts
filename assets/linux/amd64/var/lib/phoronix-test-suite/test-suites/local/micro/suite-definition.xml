@@ -7,6 +7,6 @@
     <Description>A minimal benchmark to test the functionality of the Phoronix Test Suite.</Description>
   </SuiteInformation>
   <Execute>
-    <Test>pts/blake2</Test>
+    <Test>pts/tscp</Test>
   </Execute>
 </PhoronixTestSuite>

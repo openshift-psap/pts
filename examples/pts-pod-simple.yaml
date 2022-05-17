@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pts-1cpu
+  name: pts
   labels:
     app: pts
 spec:
   containers:
-  - image: quay.io/openshift-psap/pts:amd64.micro
+  - image: quay.io/openshift-psap/pts:micro
     command:
       ### Use a wrapper to run the Phoronix Test Suite.
       - /usr/local/bin/pts.sh
@@ -15,10 +15,10 @@ spec:
       - local/micro
     name: pts
     imagePullPolicy: IfNotPresent
-    resources:
-      limits:
-        cpu: 1
-        memory: 4Gi
+    #resources:
+    #  limits:
+    #    cpu: 1
+    #    memory: 4Gi
     #securityContext:
     # privileged: true
   ### You may want to run the test suite on a selected (set of) node(s).

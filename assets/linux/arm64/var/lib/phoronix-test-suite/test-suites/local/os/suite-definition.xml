@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<PhoronixTestSuite>
+  <SuiteInformation>
+    <Title>OS Suite</Title>
+    <Version>0.0.1</Version>
+    <TestType>OS</TestType>
+    <Description>This test suite contains tests designed to test the system's OS.</Description>
+  </SuiteInformation>
+  <Execute>
+    <Test>pts/osbench</Test>
+    <Mode>BATCH</Mode>
+  </Execute>
+  <Execute>
+    <Test>pts/perf-bench</Test>
+    <Mode>BATCH</Mode>
+  </Execute>
+</PhoronixTestSuite>

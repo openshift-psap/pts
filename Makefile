@@ -1,6 +1,6 @@
 PROGRAM:=ptrp
 SRC:=$(shell find ./cmd -name \*.go)
-ARCH:=amd64	# arm64
+ARCH:=$(shell /bin/bash -c "podman version --format '{{ .Client.OsArch }}' | grep -o '[^/]*$$'")
 OUT_DIR:=_output
 GOFLAGS:=
 
@@ -36,7 +36,11 @@ clean:
 	rm -rf $(OUT_DIR)
 
 image: $(DOCKERFILE)
-	podman build $(NOCACHE) --arch $(ARCH) --build-arg=PTS_TEST_SUITE="$(PTS_TEST_SUITE)" -f $(DOCKERFILE) -t $(IMAGE) .
+	podman build $(NOCACHE) \
+	  --arch=$(ARCH) \
+	  --build-arg=ARCH="$(ARCH)" \
+	  --build-arg=PTS_TEST_SUITE="$(PTS_TEST_SUITE)" \
+	  -f $(DOCKERFILE) -t $(IMAGE) .
 
 image-push push: 
 	podman push --authfile $(AUTHFILE) $(IMAGE)

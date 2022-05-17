@@ -10,23 +10,23 @@ WORKDIR /root
 # Automatically quit if the time of a test run exceeds 3x the average time it normally takes the particular test to complete its run.
 ENV TEST_TIMEOUT_AFTER=auto
 
-# phoronix-test-suite.xml with settings for running tests in a batch mode.
-# Helper scripts and opinionated test-suites included.
-COPY ./assets/ /
-
-# Do not change PTS_TEST_SUITE if you are using Makefile to build the container image.
-# It will be overriden by the value supplied by the Makefile.
-# Use "make PTS_TEST_SUITE=mysuite image" instead.
-ARG PTS_TEST_SUITE="local/recommended"
+ARG ARCH
+ARG PTS_TEST_SUITE
 ARG INSTALL_PKGS=" \
-      expect strace tmux rpm-build procps-ng \
+      expect strace tmux rpm-build procps-ng rsync \
       php-cli php-xml php-json unzip google-benchmark google-benchmark-devel \
-      perl perl-CPAN cmake-filesystem pkg-config ncurses-devel libtool \
+      cmake perl perl-CPAN cmake-filesystem pkg-config ncurses-devel libtool \
       libassuan-devel xz time \
     "
+
+# phoronix-test-suite.xml with settings for running tests in a batch mode.
+# Helper scripts and opinionated test-suites included.
+COPY ./assets/linux/all/ /
+COPY ./assets/linux/$ARCH/ /
+
 # Initialize /etc/yum.repos.d/redhat.repo
 # See https://access.redhat.com/solutions/1443553
-RUN subscription-manager repos --enable rhel-8-for-x86_64-appstream-rpms && \
+RUN subscription-manager repos --enable rhel-8-for-$(arch)-appstream-rpms && \
     subscription-manager repos --enable codeready-builder-for-rhel-8-$(arch)-rpms && \
     dnf install -y --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
     dnf repolist --disablerepo=* && \
@@ -34,12 +34,11 @@ RUN subscription-manager repos --enable rhel-8-for-x86_64-appstream-rpms && \
     curl -LO https://kojipkgs.fedoraproject.org/vol/fedora_koji_archive02/packages/npth/1.5/4.fc28/src/npth-1.5-4.fc28.src.rpm && \
     rpmbuild --rebuild *.rpm && \
     rpm -ivh /root/rpmbuild/RPMS/$(arch)/npth-devel-1.*.rpm && \
-    curl -LO https://phoronix-test-suite.com/releases/phoronix-test-suite-10.8.2.tar.gz && \
+    curl -LO https://phoronix-test-suite.com/releases/phoronix-test-suite-10.8.3.tar.gz && \
     tar xvf *.gz && \
     cd phoronix-test-suite/ && \
     mv pts-core/objects/pts_openbenchmarking_upload.php{,.disabled} && \
     sed -i 's|<PackageName>python python3|<PackageName>python3|' ./pts-core/external-test-dependencies/xml/fedora-packages.xml && \
-    sed -i 's|Digest/</FileCheck>|Digest/ OR /usr/lib64/perl5/vendor_perl/Digest/MD5.pm</FileCheck>|' ./pts-core/external-test-dependencies/xml/generic-packages.xml && \
     for ts in $PTS_TEST_SUITE; do \
       ./phoronix-test-suite install-dependencies $ts && \
       ./phoronix-test-suite install $ts; \
