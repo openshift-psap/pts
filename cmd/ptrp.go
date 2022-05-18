@@ -9,12 +9,15 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
 const (
 	PNAME            = "ptrp"
 	outputDirDefault = "./"
+	noiseMaxDefault  = 3.5 // in percent
+	suiteNameDefault = "suite"
 
 	gp = `
 set output graph_image_out
@@ -49,9 +52,17 @@ plot \
 // Global variables.
 var (
 	pOutputDir = outputDirDefault
+	pNoiseMax  = noiseMaxDefault
+	pSuiteName = suiteNameDefault
 	pFormat    = "text"
 	pGnuplot   = flag.Bool("g", false, "output gnuplot file(s) processing")
+	pScore     = flag.Bool("s", false, "output only scoring statistics based on better performance")
 )
+
+type custom struct {
+	label string
+	score int
+}
 
 // Results is a struct which contains the complete slice of all Results.
 type PhoronixTestSuite struct {
@@ -59,6 +70,7 @@ type PhoronixTestSuite struct {
 	Generated Generated `xml:"Generated"`
 	System    System    `xml:"System"`
 	Results   []Result  `xml:"Result"`
+	c         custom
 }
 
 type Generated struct {
@@ -107,6 +119,27 @@ type Entry struct {
 	JSON       string   `xml:"JSON"`
 }
 
+func splitWithEsc(s string, separator, escape byte) []string {
+	var (
+		buf []byte
+		ret []string
+	)
+	for i := 0; i < len(s); i++ {
+		if s[i] == separator {
+			ret = append(ret, string(buf))
+			buf = buf[:0]
+		} else if s[i] == escape && i+1 < len(s) {
+			i++
+			buf = append(buf, s[i])
+		} else {
+			buf = append(buf, s[i])
+		}
+	}
+	ret = append(ret, string(buf))
+
+	return ret
+}
+
 func parseCmdOpts() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [options] <composite.xml file(s)>\n", PNAME)
@@ -116,7 +149,9 @@ func parseCmdOpts() {
 	}
 
 	flag.StringVar(&pFormat, "f", pFormat, "format: csv|gp|text")
+	flag.Float64Var(&pNoiseMax, "noise-max", pNoiseMax, "allow for some noise")
 	flag.StringVar(&pOutputDir, "o", pOutputDir, "output directory to write gnuplot files to")
+	flag.StringVar(&pSuiteName, "suite-name", pSuiteName, "suite name to prefix the statistics scores with")
 	flag.Parse()
 }
 
@@ -199,7 +234,7 @@ func resultsToCSV(pts []PhoronixTestSuite) error {
 	}
 
 	for _, s := range pts {
-		fmt.Printf("# %s\n", s.System.Notes)
+		fmt.Printf("# %s\n", s.c.label)
 		fmt.Printf("# ========================\n")
 		for _, r := range s.Results {
 			fmt.Printf("%s: %s,%s,%s\n", r.Title, r.Description, r.Proportion, r.Data.Entry.Value)
@@ -221,6 +256,10 @@ func resultsToGnuplot(pts []PhoronixTestSuite) error {
 	fmtWide := fmt.Sprintf("%%0%dd", len(fmt.Sprintf("%d", results)))
 
 	for n, r := range pts[0].Results {
+		if len(pts[0].Results[n].Data.Entry.Value) == 0 {
+			continue
+		}
+
 		sb.Reset()
 		basename := fmt.Sprintf(fmtWide+"-%s", n, sanitizeTestIdentifier(r.Identifier))
 		outputFile := basename + ".gp"
@@ -231,7 +270,7 @@ func resultsToGnuplot(pts []PhoronixTestSuite) error {
 		defer f.Close()
 
 		sb.WriteString("$graph_data_in <<EOD\n")
-		sb.WriteString(fmt.Sprintf("%s\\n{/:Italics{%s}|%s\n", pts[0].System.Notes, pts[0].Results[n].Data.Entry.Value, pts[0].Results[n].Data.Entry.Value))
+		sb.WriteString(fmt.Sprintf("%s\\n{/:Italics{%s}|%s\n", pts[0].c.label, pts[0].Results[n].Data.Entry.Value, pts[0].Results[n].Data.Entry.Value))
 		for i := 1; i < len(pts); i++ {
 			value := ""
 			found := false
@@ -247,7 +286,7 @@ func resultsToGnuplot(pts []PhoronixTestSuite) error {
 			if !found || len(value) == 0 {
 				value = "-"
 			}
-			sb.WriteString(fmt.Sprintf("%s\\n{/:Italics{%s}|%s\n", pts[i].System.Notes, value, value))
+			sb.WriteString(fmt.Sprintf("%s\\n{/:Italics{%s}|%s\n", pts[i].c.label, value, value))
 		}
 		sb.WriteString("EOD\n\n")
 
@@ -290,15 +329,107 @@ func mkdir(dir string) error {
 	return nil
 }
 
+func score(pts []PhoronixTestSuite) error {
+	var values []float64
+
+	if len(pts) == 0 {
+		return fmt.Errorf("no PTS results")
+	}
+
+	parseFloat := func(s string) float64 {
+		f, err := strconv.ParseFloat(s, 64)
+		if err != nil {
+			f = 0
+		}
+		return f
+	}
+
+	suites := len(pts)
+
+loop:
+	for n, r := range pts[0].Results {
+		values = make([]float64, suites)
+		values[0] = parseFloat(pts[0].Results[n].Data.Entry.Value)
+		if len(pts[0].Results[n].Data.Entry.Value) == 0 || values[0] == 0 {
+			continue
+		}
+
+		for i := 1; i < suites; i++ {
+			found := false
+			o := 0
+			for ; o < len(pts[i].Results); o++ {
+				if r.Identifier != pts[i].Results[o].Identifier ||
+					r.Arguments != pts[i].Results[o].Arguments {
+					continue
+				}
+				values[i] = parseFloat(pts[i].Results[o].Data.Entry.Value)
+				found = true
+			}
+			if !found || values[i] == 0 {
+				continue
+			}
+		}
+
+		// Set the scores only if we have non-zero values for all results.
+		for i := 0; i < suites; i++ {
+			if values[i] == 0 {
+				continue loop
+			}
+		}
+
+		// Set the scores.
+		for i := 0; i < suites; i++ {
+			for j := 0; j < suites; j++ {
+				if i == j {
+					continue
+				}
+				// Allow for some noise.
+				noise := values[i]*(1+pNoiseMax/100) - values[i]
+				if pts[0].Results[n].Proportion == "LIB" {
+					// Lower is better.
+					if values[i]-noise <= values[j] {
+						pts[i].c.score++
+					}
+				} else {
+					// Higher is better.
+					if values[i]+noise >= values[j] {
+						pts[i].c.score++
+					}
+				}
+			}
+		}
+	}
+
+	// Gnuplot friendly output.
+	fmt.Print("# Suite")
+	for i := 0; i < suites; i++ {
+		fmt.Printf("\t%v", pts[i].c.label)
+	}
+	fmt.Println()
+
+	fmt.Printf("%v", pSuiteName)
+	for i := 0; i < suites; i++ {
+		fmt.Printf("\t%v", pts[i].c.score)
+	}
+	fmt.Println()
+
+	return nil
+}
+
 func parsePTSResults() error {
 	var pts []PhoronixTestSuite
 
-	for _, f := range flag.Args() {
-		r, err := parseResultsXml(f)
+	for i, arg := range flag.Args() {
+		a := splitWithEsc(arg, '|', '\\')
+		r, err := parseResultsXml(a[0])
 		if err != nil {
 			return err
 		}
+
 		pts = append(pts, r)
+		if len(a) > 1 {
+			pts[i].c.label = a[1]
+		}
 	}
 
 	if pOutputDir != outputDirDefault {
@@ -306,6 +437,10 @@ func parsePTSResults() error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if *pScore {
+		return score(pts)
 	}
 
 	switch pFormat {
@@ -330,6 +465,6 @@ func main() {
 
 	err := parsePTSResults()
 	if err != nil {
-		fmt.Printf("failed to parse test results: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to parse test results: %v\n", err)
 	}
 }
