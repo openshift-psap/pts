@@ -17,10 +17,6 @@
     <Mode>BATCH</Mode>
   </Execute>
   <Execute>
-    <Test>pts/kvazaar</Test>
-    <Mode>BATCH</Mode>
-  </Execute>
-  <Execute>
     <Test>pts/compress-7zip-1.7.0</Test>
     <Arguments></Arguments>
     <Description></Description>
