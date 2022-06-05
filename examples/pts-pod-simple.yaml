@@ -25,3 +25,14 @@ spec:
   #nodeSelector:
   #  cpu: "1"
   restartPolicy: Never
+  ### You may want to use Pod anti-affinity for making sure only one PTS Pod runs on a node at a time.
+  #affinity:
+  #  podAntiAffinity:
+  #    requiredDuringSchedulingIgnoredDuringExecution:
+  #    - labelSelector:
+  #        matchExpressions:
+  #        - key: app
+  #          operator: In
+  #          values:
+  #          - pts
+  #      topologyKey: "kubernetes.io/hostname"
