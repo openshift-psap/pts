@@ -40,3 +40,42 @@ The PTS results are exposed via the container logs.
 ```
 kubectl logs $pts_pod | sed -ne '/<?xml version="1.0"?>/,$ p' > ${pts_pod}-results.xml
 ```
+
+
+## Processing the Phoronix Test Suite results
+
+Once you retrieve the PTS result XML files, you can process the results by the `ptrp`
+(Phoronix Test Results Parser) tool.  To get full help on running the tool, run
+`./ptrp --help`.
+
+The scoring statistics option `-s` helps users show wins/losses between PTS result XML files.
+For example:
+
+```
+f1=results/aws/m5/pts-cpu.xml
+f2=results/aws/m5a/pts-cpu.xml
+f3=results/aws/m6i/pts-cpu.xml
+
+./ptrp \
+  -s \
+  --suite-name "CPU" \
+  "$f1|m5" \
+  "$f2|m5a" \
+  "$f3|m6i"
+```
+
+Another option is detailed comparison between individual test profiles.  For example, to get
+`gnuplot` sources comparing three PTS test results files, use:
+
+```
+f1=results/aws/m5/pts-cpu.xml
+f2=results/aws/m5a/pts-cpu.xml
+f3=results/aws/m6i/pts-cpu.xml
+
+./ptrp \
+  -o output_dir \
+  -f gp \
+  "$f1|m5" \
+  "$f2|m5a" \
+  "$f3|m6i"
+```
