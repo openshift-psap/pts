@@ -149,7 +149,7 @@ func parseCmdOpts() {
 	}
 
 	flag.StringVar(&pFormat, "f", pFormat, "format: csv|gp|text")
-	flag.Float64Var(&pNoiseMax, "noise-max", pNoiseMax, "allow for some noise")
+	flag.Float64Var(&pNoiseMax, "noise-max", pNoiseMax, "percentage to allow for some noise")
 	flag.StringVar(&pOutputDir, "o", pOutputDir, "output directory to write gnuplot files to")
 	flag.StringVar(&pSuiteName, "suite-name", pSuiteName, "suite name to prefix the statistics scores with")
 	flag.Parse()
