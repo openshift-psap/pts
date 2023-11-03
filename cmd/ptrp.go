@@ -204,7 +204,7 @@ func resultsToText(pts []PhoronixTestSuite) error {
 		fmt.Printf("Proportion: %s\n", r.Proportion)
 		fmt.Printf("AppVersion: %s\n", r.AppVersion)
 
-		fmt.Printf("  %s\n", pts[0].Results[n].Data.Entry.Value)
+		fmt.Printf("  %s\n", r.Data.Entry.Value)
 		for i := 1; i < len(pts); i++ {
 			value := ""
 			found := false
@@ -229,15 +229,60 @@ func resultsToText(pts []PhoronixTestSuite) error {
 }
 
 func resultsToCSV(pts []PhoronixTestSuite) error {
+	const (
+		fs = "\t" // CVS field separator
+	)
+
+	var (
+		i     int
+		value string
+	)
+
 	if len(pts) == 0 {
 		return fmt.Errorf("no PTS results")
 	}
 
-	for _, s := range pts {
-		fmt.Printf("# %s\n", s.c.label)
-		fmt.Printf("# ========================\n")
-		for _, r := range s.Results {
-			fmt.Printf("%s: %s,%s,%s\n", r.Title, r.Description, r.Proportion, r.Data.Entry.Value)
+	for _, r := range pts[0].Results {
+		fmt.Printf("%s%s%s%s%s%s%s%s%s", r.Title, fs, r.Description, fs, r.Proportion, fs, r.Scale, fs, r.Data.Entry.Value)
+
+		for i = 1; i < len(pts); i++ {
+			value = ""
+			found := false
+			o := 0
+			for ; o < len(pts[i].Results); o++ {
+				if r.Identifier != pts[i].Results[o].Identifier ||
+					r.Arguments != pts[i].Results[o].Arguments {
+					continue
+				}
+				value = pts[i].Results[o].Data.Entry.Value
+				found = true
+			}
+			if !found || len(value) == 0 {
+				value = "-"
+			}
+			fmt.Printf("%s%s", fs, value)
+		}
+		if i == 2 {
+			// A/B comparison, print the delta
+			var a, b string
+
+			if r.Proportion == "HIB" {
+				// Higher is better
+				a = r.Data.Entry.Value
+				b = value
+			} else {
+				// Lower is better
+				a = value
+				b = r.Data.Entry.Value
+			}
+			aFloat := parseFloat(a)
+			bFloat := parseFloat(b)
+			if aFloat == 0 || bFloat == 0 {
+				fmt.Printf("%s-", fs)
+			} else {
+				// This will give positive % when B is better
+				fmt.Printf("%s%.1f", fs, (1-(aFloat/bFloat))*100)
+			}
 		}
 		fmt.Println()
 	}
@@ -329,19 +374,19 @@ func mkdir(dir string) error {
 	return nil
 }
 
+func parseFloat(s string) float64 {
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		f = 0
+	}
+	return f
+}
+
 func score(pts []PhoronixTestSuite) error {
 	var values []float64
 
 	if len(pts) == 0 {
 		return fmt.Errorf("no PTS results")
-	}
-
-	parseFloat := func(s string) float64 {
-		f, err := strconv.ParseFloat(s, 64)
-		if err != nil {
-			f = 0
-		}
-		return f
 	}
 
 	suites := len(pts)
