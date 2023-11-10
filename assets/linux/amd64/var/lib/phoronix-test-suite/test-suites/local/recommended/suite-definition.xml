@@ -21,10 +21,7 @@
     <Test>pts/encode-flac</Test>
   </Execute>
   <Execute>
-    <Test>pts/compress-pbzip2</Test>
-  </Execute>
-  <Execute>
-    <Test>pts/hmmer</Test>
+    <Test>pts/compress-pbzip2-1.5.0</Test>
   </Execute>
   <Execute>
     <Test>pts/gcrypt</Test>

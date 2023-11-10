@@ -1,4 +1,4 @@
-FROM registry.ci.openshift.org/openshift/release:golang-1.17 AS builder
+FROM registry.ci.openshift.org/openshift/release:golang-1.20 AS builder
 WORKDIR /root
 COPY . .
 RUN make build
@@ -32,7 +32,7 @@ RUN dnf install -y --setopt=tsflags=nodocs epel-release dnf-plugins-core && \
     curl -LO https://kojipkgs.fedoraproject.org/packages/google-benchmark/1.5.4/1.fc34/src/google-benchmark-1.5.4-1.fc34.src.rpm && \
     yum-builddep -y *.rpm && rpmbuild --rebuild *.rpm && \
     dnf install -y --setopt=tsflags=nodocs /root/rpmbuild/RPMS/$(arch)/google-benchmark-*.rpm && \
-    curl -LO https://phoronix-test-suite.com/releases/phoronix-test-suite-10.8.3.tar.gz && \
+    curl -LO https://phoronix-test-suite.com/releases/phoronix-test-suite-10.8.4.tar.gz && \
     tar xvf *.gz && \
     cd phoronix-test-suite/ && \
     mv pts-core/objects/pts_openbenchmarking_upload.php{,.disabled} && \
@@ -42,4 +42,3 @@ RUN dnf install -y --setopt=tsflags=nodocs epel-release dnf-plugins-core && \
     done && \
     dnf clean all && \
     rm -rf /root/{rpmbuild,*.rpm,*.tar.gz} /var/cache/yum
-

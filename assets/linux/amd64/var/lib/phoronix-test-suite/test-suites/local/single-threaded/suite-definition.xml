@@ -86,13 +86,6 @@
     <Test>pts/gnupg</Test>
   </Execute>
   <Execute>
-    <Test>pts/minion</Test>
-    <Mode>BATCH</Mode>
-  </Execute>
-  <Execute>
-    <Test>pts/opencv-bench</Test>
-  </Execute>
-  <Execute>
     <Test>pts/perl-benchmark</Test>
     <Mode>BATCH</Mode>
   </Execute>
