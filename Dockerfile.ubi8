@@ -1,9 +1,9 @@
-FROM registry.ci.openshift.org/openshift/release:golang-1.17 AS builder
+FROM registry.ci.openshift.org/openshift/release:golang-1.20 AS builder
 WORKDIR /root
 COPY . .
 RUN make build
 
-FROM registry.access.redhat.com/ubi8/ubi:8.5
+FROM registry.access.redhat.com/ubi8/ubi:8.6
 COPY --from=builder /root/_output/ptrp /usr/local/bin/
 WORKDIR /root
 
@@ -34,7 +34,7 @@ RUN subscription-manager repos --enable rhel-8-for-$(arch)-appstream-rpms && \
     curl -LO https://kojipkgs.fedoraproject.org/vol/fedora_koji_archive02/packages/npth/1.5/4.fc28/src/npth-1.5-4.fc28.src.rpm && \
     rpmbuild --rebuild *.rpm && \
     rpm -ivh /root/rpmbuild/RPMS/$(arch)/npth-devel-1.*.rpm && \
-    curl -LO https://phoronix-test-suite.com/releases/phoronix-test-suite-10.8.3.tar.gz && \
+    curl -LO https://phoronix-test-suite.com/releases/phoronix-test-suite-10.8.4.tar.gz && \
     tar xvf *.gz && \
     cd phoronix-test-suite/ && \
     mv pts-core/objects/pts_openbenchmarking_upload.php{,.disabled} && \
@@ -46,4 +46,3 @@ RUN subscription-manager repos --enable rhel-8-for-$(arch)-appstream-rpms && \
     dnf clean all && \
     rm -rf /etc/pki/entitlement /etc/rhsm && \
     rm -rf /root/{rpmbuild,*.rpm,*.tar.gz} /var/cache/yum
-
